@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<head>
+    <%- include('layout/head'); %>
+    <title><%= title %></title>
+</head>
+<body class="container">
+    
+    <%- include('layout/header'); %>
+    
+    <main>
+        <h1>課程管理</h1>
+        <div class="row">
+                <a href="/courses/add" type="button" class="btn btn-primary">新增課程</a>
+        </div>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="row">_id</th>
+                    <th scope="row">課程名稱</th>
+                    <th scope="row">課程時間</th>
+                    <th scope="row">講者</th>
+                </tr>
+                <% courses.forEach(function( course ){ %>
+                <tr>
+                    <th><%= course._id %> </th>
+                    <th><%= course.course %> </th>
+                    <th><%= course.time %> </th>
+                    <th><%= course.lecturer %> </th>
+                    <th><a href="courses/del?id=<%= course.id %>">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>
+                </tr>
+                <% }); %>
+                
+            </thead>
+        </table>
+    </main>
+    
+    <%- include('layout/footer'); %>
+
+</body>
+</html>

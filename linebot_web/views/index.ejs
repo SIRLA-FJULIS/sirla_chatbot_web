@@ -1,0 +1,23 @@
+<!-- views/index.ejs -->
+
+<!DOCTYPE html>
+
+    <%- include('layout/head'); %>
+
+<body class="container">
+    
+    <%- include('layout/header'); %>
+    
+    <main>
+        <div class="jumbotron">
+            <%- include('login'); %>
+        </div>
+    </main>  
+
+    <a href="/courses">課程管理</a>
+    <a href="/student">學員簽到記錄</a>
+    
+    <%- include('layout/footer'); %>
+
+</body>
+</html>
