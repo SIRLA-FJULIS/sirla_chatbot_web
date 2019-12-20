@@ -10,18 +10,19 @@
         <table class="table">
             <thead class="thead-dark">
                 <tr >
-                    <th>姓名</th>
-                    <th>簽到次數</th>
-                    <th>詳情</th>
+                    <th scope="row">姓名</th>
+                    <th scope="row">簽到次數</th>
+                    <th scope="row">詳情</th>
 
                 </tr>
-                <% for (let j=0; j<info.length; j++) {%>
+                <% student_info.forEach(function( student ){ %>
                     <tr>
-                        <th scope="col"><%= info[j].name %> </th>
-                        <th scope="col"><%= info[j].times %> </th>
-                        <th scope="col"><a><%= info[j].times %> </a></th>
+                        <th><%= student.name %> </th>
+                        <th><%= student.times %></th>
+                        <th><%= student.course %> </th>
+                        
                     </tr>
-                <% } %>
+                <% }); %>
             </thead>
         </table>
     </main>

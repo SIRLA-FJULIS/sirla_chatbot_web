@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
-
-let student = {
-
-    title: 'student',
-    info: [
-        {name:'Super',times:'5'}, 
-        {name:'Su',times:'4'}, 
-        {name:'Superman',times:'10'}]
-  } 
+const model = require('../models/student');
+const Student_info = model.Student;
 
 
-router.get('/', function(req, res) {
-    res.render('student.ejs', student);
+
+
+router.get('/', (req, res) => {
+    Student_info.find((err, docs) => {
+        console.log(Student_info)
+        res.render('student', {
+            title: '學員簽到記錄',
+            student_info: docs
+        });
+    });
 });
 
 

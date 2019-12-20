@@ -30,7 +30,6 @@ router.get('/add', (req, res, next) =>  {
 
 // 新增課程
 router.post('/add', (req, res, next) =>  {
-    // res.redirect('/');
     let courses = new Course({
         course: req.body.course,
         time: req.body.time,
