@@ -21,5 +21,8 @@ app.set('view engine', 'ejs');
 
 //路由
 routes(app);
-
+//資料庫連結
+mongoose.connect(process.env.DB_CONNECTION,{ useUnifiedTopology: true,useNewUrlParser: true },() => {
+    console.log("connect DB!")
+  })
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))   

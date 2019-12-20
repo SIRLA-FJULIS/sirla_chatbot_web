@@ -9,8 +9,8 @@ let courseSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    time:{
-        type:Date
+    date:{
+        type:String
         
     },    
 });
