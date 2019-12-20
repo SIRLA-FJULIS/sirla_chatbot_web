@@ -51,7 +51,7 @@ router.get('/del', (req, res, next) => {
     let id = req.query.id;
 
     if (id && id != '') {
-        console.log('=====================delete id = ' + id);
+        // console.log('=====================delete id = ' + id);
         Course.findByIdAndRemove(id, (err, docs) => {
 
             res.redirect('/courses');
@@ -67,7 +67,7 @@ router.get('/update', (req, res, next) => {
 
     if (id && id != '') {
         Course.findById(id, (err, docs) => {
-            // console.log('========================findById(\"' + id + '\")=======================\n' + docs);
+            console.log(docs)
             res.render('update', {
                 title: '修改課程資訊',
                 course: docs

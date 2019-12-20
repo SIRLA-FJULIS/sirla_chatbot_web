@@ -10,6 +10,7 @@
         <table class="table">
             <thead class="thead-dark">
                 <tr >
+                    <th scope="row">_id</th>
                     <th scope="row">姓名</th>
                     <th scope="row">簽到次數</th>
                     <th scope="row">詳情</th>
@@ -17,7 +18,8 @@
                 </tr>
                 <% student_info.forEach(function( student ){ %>
                     <tr>
-                        <th><%= student.name %> </th>
+                        <th><%= student._id %> </th>
+                        <th><%= student.name %></th>
                         <th><%= student.times %></th>
                         <th><%= student.course %> </th>
                         

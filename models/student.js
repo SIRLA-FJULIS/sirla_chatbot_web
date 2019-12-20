@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 let studentSchema = new mongoose.Schema({
-    student:{
+    name:{
         type:String,
     },
     course:{
