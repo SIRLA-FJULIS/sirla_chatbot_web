@@ -4,9 +4,18 @@ const model = require('../models/data');
 const Course = model.Course;
 const router = express.Router();
 
+
+// router.get('/', (req, res, next) => {
+//     Course.find((err, docs) => {
+        
+//         res.render('index', {
+//             courses: sortcourse
+//         });
+        
+//     });
+// });
 // 首頁
 router.get('/', (req, res, next) => {
-    Course.find().sort({date:1}).save
     Course.find((err, docs) => {
         //排序
         let sortcourse = docs.sort((a,b) =>{
@@ -16,6 +25,7 @@ router.get('/', (req, res, next) => {
             title: '課程管理',
             courses: sortcourse
         });
+        
     });
 });
 

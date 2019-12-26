@@ -6,4 +6,4 @@ let studentSchema = new mongoose.Schema({
     times: Number,
 });
 
-module.exports = mongoose.model('student_info', studentSchema, 'student');
+exports.Student = mongoose.model('student_info', studentSchema, 'student');
