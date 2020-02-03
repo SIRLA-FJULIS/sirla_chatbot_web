@@ -1,4 +1,6 @@
 require('dotenv').config();
+var ObjectID = require('mongodb').ObjectID;
+
 
 const path = require('path');
 const express = require('express');
@@ -42,19 +44,40 @@ function handleEvent(event) {
 
   if (event.message.text === '簽到') {
     let userid = event.source.userId;
-    let studentData = new Student({
-      name: userid,
-      course: event.source.type,
-      times : Date.now()
-    });
-    studentData.save((err, Student) => {
-      if (err) {
-        return handleError(err);
+
+    Student.find((err,docs) =>{
+      //console.log(docs)
+      var found = false;
+      for(let j = 0; j < docs.length; j++){
+        if (userid === docs[j].name){
+		    Student.findOneAndUpdate({'name' : userid}, {$set:{'times': docs[j].times + 1}}, (err, docs)=>{
+		    	console.log(err);
+		    	console.log(docs);
+		    });
+		    found = true;
+		    console.log("有")
+        	break;
+        }
       }
-      console.log('document saved');
-    });
+      if(!found){
+      	let studentData = new Student({
+	      name: userid,
+	      course: event.source.type,
+	      times : 1
+	    });
+
+	    studentData.save((err, Student) => {
+	    if (err) {
+	        return handleError(err);
+	    }
+	      console.log('document saved');
+		});
+	   	}
+    })
+
     reply = "簽到完成";
   }else if(event.message.text === '課程'){
+  	reply = "";
     let today=new Date();
     let now_time = [];
     let distance = [];
@@ -72,7 +95,7 @@ function handleEvent(event) {
       console.log(distance);
       let k = 999; //看最小值用
       for(let j = 0; j <distance.length; j++){
-        if (distance[j] > 0 && distance[j] < k){
+        if (distance[j] >= 0 && distance[j] < k){
           k = distance[j];
         }
       }
