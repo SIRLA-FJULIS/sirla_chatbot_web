@@ -10,13 +10,26 @@
     
     <main>
         <div class="jumbotron text-center">
-            <p>今日課程為：<span>xxxx</span></p>
-            <p id="">簽到密碼：<span>1234</span></p>
-            <button class="btn btn-primary">產生簽到密碼</button>
+            
+            <p>今日課程為：<span><%= courses %></span></p>
+            <p>簽到數字：<span id="number"></span></p>
+            <a type="botton" name="number" class="btn btn-primary" onclick="clickBtn()">產生簽到密碼</a> 
+            <input type="hidden" name="id" value="<%= id %>">
         </div>
     </main>  
 
     <%- include('layout/footer'); %>
 
+    <script>
+        function clickBtn(){
+            let number = Math.floor(Math.random()*10000)
+            document.getElementById('number').innerHTML = number
+
+            let xhttp = new XMLHttpRequest()
+            xhttp.open('GET', '/get_number?number=' + number)
+            xhttp.send()
+            }
+            
+    </script>
 </body>
 </html>

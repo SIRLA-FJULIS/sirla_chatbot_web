@@ -5,15 +5,6 @@ const Course = model.Course;
 const router = express.Router();
 
 
-// router.get('/', (req, res, next) => {
-//     Course.find((err, docs) => {
-        
-//         res.render('index', {
-//             courses: sortcourse
-//         });
-        
-//     });
-// });
 // 首頁
 router.get('/', (req, res, next) => {
     Course.find((err, docs) => {
@@ -46,11 +37,7 @@ router.post('/add', (req, res, next) =>  {
         date: req.body.date,
         lecturer: req.body.lecturer
     });
-    
-    // console.log('======================create========================');
-
     courses.save((err, doc) => {
-        // console.log(doc);
         res.redirect('/courses');
     });
     
@@ -60,9 +47,7 @@ router.post('/add', (req, res, next) =>  {
 router.get('/del', (req, res, next) => {
     let id = req.query.id;
     if (id && id != '') {
-        // console.log('=====================delete id = ' + id);
         Course.findByIdAndRemove(id, (err, docs) => {
-
             res.redirect('/courses');
         });
     }
@@ -76,7 +61,6 @@ router.get('/update', (req, res, next) => {
 
     if (id && id != '') {
         Course.findById(id, (err, docs) => {
-            // console.log('========================findById(\"' + id + '\")=======================\n' + docs);
             res.render('update', {
                 title: '修改課程資訊',
                 course: docs
@@ -98,13 +82,11 @@ router.post('/update', (req, res, next) =>  {
     let id = req.body.id;
 
     if (id && id != '') {
-        // console.log('=======================update id = ' + id);
         Course.findByIdAndUpdate(id, courses, (err, docs) => {
             res.redirect('/courses');
         });
     }
     
 });
-
 
 module.exports = router;
