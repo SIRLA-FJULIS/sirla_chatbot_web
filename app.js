@@ -1,7 +1,6 @@
 require('dotenv').config();
 var ObjectID = require('mongodb').ObjectID;
 
-
 const path = require('path');
 const express = require('express');
 const routes = require('./routes');
@@ -44,48 +43,78 @@ function handleEvent(event) {
 
   if (event.message.text === '簽到') {
     let userid = event.source.userId;
+    let today=new Date();
+    let now_time = [];
+    let distance = [];
+    var hava_class = false;
+    reply = "";
+    now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
-    Student.find((err,docs) =>{
-      //console.log(docs)
-      var found = false;
-      for(let j = 0; j < docs.length; j++){
-        if (userid === docs[j].name){
-		    Student.findOneAndUpdate({'name' : userid}, {$set:{'times': docs[j].times + 1}}, (err, docs)=>{
-		    	console.log(err);
-		    	console.log(docs);
-		    });
-		    found = true;
-		    console.log("有")
-        	break;
+    Class.find((err,docs) => {
+      for(let i = 0; i <docs.length; i++){
+        console.log(docs[i].date);
+        class_time = docs[i].date.split("-");
+        let step = (class_time[0] - now_time[0])*365 + (class_time[1] - now_time[1])*30 + (class_time[2] - now_time[2]);
+        distance.push(step);
+      }
+
+      for(let j = 0; j <distance.length; j++){
+        if (distance[j] == 0){
+            hava_class = true;
+
+            Student.find((err,docs) =>{
+            var found = false;
+            for(let k = 0; k < docs.length; k++){
+              if (userid === docs[k].name){
+              Student.findOneAndUpdate({'name' : userid}, {$set:{'times': docs[k].times + 1}}, (err, docs)=>{
+                console.log(err);
+                //console.log(docs);
+              });
+              found = true;
+                break;
+              }
+            }
+            if(!found){
+              let studentData = new Student({
+              name: userid,
+              course: event.source.type,
+              times : 1
+            });
+
+            studentData.save((err, Student) => {
+            if (err) {
+                return handleError(err);
+            }
+              console.log('document saved');
+          });
+            }
+          })
+          break   
         }
       }
-      if(!found){
-      	let studentData = new Student({
-	      name: userid,
-	      course: event.source.type,
-	      times : 1
-	    });
+    if(hava_class === true){
+        return client.replyMessage(event.replyToken,{
+            type: 'text',
+            text: "簽到完成"
+        });
+    }else{
+        return client.replyMessage(event.replyToken,{
+            type: 'text',
+            text: "今日無課程"
+        });
+    }
+  })
 
-	    studentData.save((err, Student) => {
-	    if (err) {
-	        return handleError(err);
-	    }
-	      console.log('document saved');
-		});
-	   	}
-    })
 
-    reply = "簽到完成";
+    
   }else if(event.message.text === '課程'){
   	reply = "";
     let today=new Date();
     let now_time = [];
     let distance = [];
-    var ans = "";
     now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
     Class.find((err,docs) => {
-      
       for(let i = 0; i <docs.length; i++){
         console.log(docs[i].date);
         class_time = docs[i].date.split("-");
