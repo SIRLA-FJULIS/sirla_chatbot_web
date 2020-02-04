@@ -1,3 +1,4 @@
+// 課程資料
 const mongoose = require('mongoose')
 
 let courseSchema = new mongoose.Schema({          

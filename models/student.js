@@ -1,6 +1,8 @@
+// 學員資訊
 const mongoose = require('mongoose');
 
 let studentSchema = new mongoose.Schema({
+    lineid:String,
     name: String,
     course: Array,
     times: Number,
