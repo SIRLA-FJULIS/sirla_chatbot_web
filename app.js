@@ -40,9 +40,23 @@ function handleEvent(event) {
   if (event.type !== 'message' || event.message.type !== 'text') {
     return Promise.resolve(null);
   }
+  // 將下面重複用到的變數提上來
+  let userid = event.source.userId;
+  let user_name = ''
+  
+  // 取得使用者名稱
+  client.getProfile(userid)
+  .then((profile) => {
+    user_name = profile.displayName;
+    // console.log(profile.userId);
+    // console.log(profile.pictureUrl);
+    // console.log(profile.statusMessage);
+  })
+  .catch((err) => {
+    // error handling
+  });
 
   if (event.message.text === '簽到') {
-    let userid = event.source.userId;
     let today = new Date();
     let now_time = [];
     let distance = [];
@@ -150,7 +164,22 @@ function handleEvent(event) {
       }
     })
   }else if(event.message.text === '出席率查詢'){
-    reply = "尚無資料";
+    let times = ''
+    Student.find((err, docs) =>{
+      for (i in docs){
+        if(userid == docs[i].name){
+          times = docs[i].times ;
+          return client.replyMessage(event.replyToken, {
+            type: 'text',
+            text: '本學期已完成' + times + '次簽到'
+            });
+          }
+      }
+      return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: '尚無資料'
+        });
+    })
   }else if(event.message.text === '幫助' || event.message.text === 'help'){
     reply = "請使用關鍵字：簽到、課程、出席率查詢";
   }else{
