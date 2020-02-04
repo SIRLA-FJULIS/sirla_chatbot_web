@@ -43,7 +43,7 @@ function handleEvent(event) {
 
   if (event.message.text === '簽到') {
     let userid = event.source.userId;
-    let today=new Date();
+    let today = new Date();
     let now_time = [];
     let distance = [];
     var hava_class = false;
@@ -52,7 +52,7 @@ function handleEvent(event) {
 
     Class.find((err,docs) => {
       for(let i = 0; i <docs.length; i++){
-        console.log(docs[i].date);
+        //console.log(docs[i].date);
         class_time = docs[i].date.split("-");
         let step = (class_time[0] - now_time[0])*365 + (class_time[1] - now_time[1])*30 + (class_time[2] - now_time[2]);
         distance.push(step);
@@ -62,22 +62,30 @@ function handleEvent(event) {
         if (distance[j] == 0){
             hava_class = true;
 
-            Student.find((err,docs) =>{
+            Student.find((err,student_docs) =>{
             var found = false;
-            for(let k = 0; k < docs.length; k++){
-              if (userid === docs[k].name){
-              Student.findOneAndUpdate({'name' : userid}, {$set:{'times': docs[k].times + 1}}, (err, docs)=>{
+            for(let k = 0; k < student_docs.length; k++){
+              if (userid === student_docs[k].name){
+              //寫入簽到次數
+              Student.findOneAndUpdate({'name' : userid}, {$set:{'times': student_docs[k].times + 1}}, (err, student_docs)=>{
                 console.log(err);
-                //console.log(docs);
               });
+
+              let sign_class = student_docs[k].course + '，' + docs[j].course;
+
+              //寫入簽到的課程
+              Student.findOneAndUpdate({'name' : userid}, {$set:{'course': sign_class}}, (err, student_docs)=>{
+                console.log(err);
+              });       
+
               found = true;
-                break;
+              break;
               }
             }
             if(!found){
               let studentData = new Student({
               name: userid,
-              course: event.source.type,
+              course: docs[j].course,
               times : 1
             });
 
@@ -105,11 +113,9 @@ function handleEvent(event) {
     }
   })
 
-
-    
   }else if(event.message.text === '課程'){
   	reply = "";
-    let today=new Date();
+    let today = new Date();
     let now_time = [];
     let distance = [];
     now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
