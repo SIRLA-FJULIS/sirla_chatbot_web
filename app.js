@@ -23,8 +23,8 @@ app.post('/linewebhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
     .then((result) => {
-    	res.json(result);
-    	//console.log(req.body.events);
+      res.json(result);
+      //console.log(req.body.events);
     });
 });
 
@@ -41,8 +41,8 @@ function handleEvent(event) {
     return Promise.resolve(null);
   }
   // 將下面重複用到的變數提上來
-  let userid = event.source.userId;
-  let user_name = ''
+  var userid = event.source.userId;
+  var user_name = ''
   
   // 取得使用者名稱
   client.getProfile(userid)
@@ -51,6 +51,7 @@ function handleEvent(event) {
     // console.log(profile.userId);
     // console.log(profile.pictureUrl);
     // console.log(profile.statusMessage);
+    //console.log('user_name',user_name)
   })
   .catch((err) => {
     // error handling
@@ -59,76 +60,90 @@ function handleEvent(event) {
   if (event.message.text === '簽到') {
     let today = new Date();
     let now_time = [];
-    let distance = [];
-    var hava_class = false;
+    let distance = []; //存放每堂課程離今天差幾天用
+    var hava_class = false; //判斷今日是否有課程
+    var sign = false; //判斷是否遷到過
+
     reply = "";
     now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
     Class.find((err,docs) => {
+      // 計算時間差
       for(let i = 0; i <docs.length; i++){
         //console.log(docs[i].date);
         class_time = docs[i].date.split("-");
         let step = (class_time[0] - now_time[0])*365 + (class_time[1] - now_time[1])*30 + (class_time[2] - now_time[2]);
+
         distance.push(step);
       }
 
       for(let j = 0; j <distance.length; j++){
+        // 如果今日有課(時間差為0
         if (distance[j] == 0){
-            hava_class = true;
-
-            Student.find((err,student_docs) =>{
-            var found = false;
+          hava_class = true;
+        
+          Student.find((err,student_docs) =>{
+            var found = false; //判斷是否資料庫內有這名學生
+            
             for(let k = 0; k < student_docs.length; k++){
-              if (userid === student_docs[k].name){
-              //寫入簽到次數
-              Student.findOneAndUpdate({'name' : userid}, {$set:{'times': student_docs[k].times + 1}}, (err, student_docs)=>{
-                console.log(err);
-              });
+              // 如果有這名學生
+              if (user_name === student_docs[k].name){
+                found = true;
+                let re1 = new RegExp('w*' + docs[j].course + 'w*'); //判斷這堂課是否已在被簽到的紀錄內
 
-              let sign_class = student_docs[k].course + '，' + docs[j].course;
+                if(re1.test(student_docs[k].course)){
+                  sign = true;
+                  break
+                }
+                
+                let sign_class = student_docs[k].course + '，' + docs[j].course;
+                //寫入簽到次數
+                Student.findOneAndUpdate({'name' : user_name}, {$set:{'times': student_docs[k].times + 1}});
 
-              //寫入簽到的課程
-              Student.findOneAndUpdate({'name' : userid}, {$set:{'course': sign_class}}, (err, student_docs)=>{
-                console.log(err);
-              });       
-
-              found = true;
-              break;
+                //寫入簽到的課程
+                Student.findOneAndUpdate({'name' : user_name}, {$set:{'course': sign_class}});
               }
             }
-            if(!found){
-              let studentData = new Student({
-              name: userid,
-              course: docs[j].course,
-              times : 1
-            });
 
-            studentData.save((err, Student) => {
-            if (err) {
-                return handleError(err);
-            }
-              console.log('document saved');
-          });
+            if(hava_class === true && sign === false){
+              if(!found){
+                let studentData = new Student({
+                name: user_name,
+                course: docs[j].course,
+                times : 1
+                });
+                studentData.save((err, Student) => {
+                if (err) {
+                  return handleError(err);
+                }
+                console.log('document saved');
+                });
+              }
+
+              return client.replyMessage(event.replyToken,{
+                  type: 'text',
+                  text: "簽到完成"
+                });
+
+            }else if(hava_class === true){
+              return client.replyMessage(event.replyToken,{
+                  type: 'text',
+                  text: "已經簽到"
+                });     
             }
           })
-          break   
-        }
+        }  
       }
-    if(hava_class === true){
+      if(hava_class == false){
         return client.replyMessage(event.replyToken,{
-            type: 'text',
-            text: "簽到完成"
+          type: 'text',
+          text: "今日無課程"
         });
-    }else{
-        return client.replyMessage(event.replyToken,{
-            type: 'text',
-            text: "今日無課程"
-        });
-    }
-  })
+      }
+    })
 
   }else if(event.message.text === '課程'){
-  	reply = "";
+    reply = "";
     let today = new Date();
     let now_time = [];
     let distance = [];
@@ -136,12 +151,12 @@ function handleEvent(event) {
 
     Class.find((err,docs) => {
       for(let i = 0; i <docs.length; i++){
-        console.log(docs[i].date);
+        //.log(docs[i].date);
         class_time = docs[i].date.split("-");
         let step = (class_time[0] - now_time[0])*365 + (class_time[1] - now_time[1])*30 + (class_time[2] - now_time[2]);
         distance.push(step);
       }
-      console.log(distance);
+     // console.log(distance);
       let k = 999; //看最小值用
       for(let j = 0; j <distance.length; j++){
         if (distance[j] >= 0 && distance[j] < k){
@@ -204,10 +219,10 @@ app.set('view engine', 'ejs');
 routes(app);
 //資料庫連結
 mongoose.connect(
-	process.env['DB_CONNECTION'], { 
-		useUnifiedTopology: true,useNewUrlParser: true 
-	}, () => {
-		console.log("connect DB!");
+  process.env['DB_CONNECTION'], { 
+    useUnifiedTopology: true,useNewUrlParser: true 
+  }, () => {
+    console.log("connect DB!");
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
