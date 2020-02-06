@@ -8,9 +8,15 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+// 登入登出驗證
+const flash = require('connect-flash');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+
+
 const line = require('@line/bot-sdk');
 const config = {
-  //channelId: process.env['channelId'],
+  channelId: process.env['channelId'],
   channelSecret: process.env['CHANNEL_SECRET'],
   channelAccessToken: process.env['CHANNEL_ACCESS_TOKEN']
 };
@@ -18,14 +24,19 @@ const config = {
 const app = express();
 const port = 3000;
 
+
 app.post('/linewebhook', line.middleware(config), (req, res) => {
-  
+ 
   Promise
     .all(req.body.events.map(handleEvent))
     .then((result) => {
       res.json(result);
-      //console.log(req.body.events);
-    });
+
+    })
+    .catch((error) => {
+      // error 
+      return false;
+   });
 });
 
 const client = new line.Client(config);
@@ -37,21 +48,19 @@ const Class = model_class.Course
 
 
 function handleEvent(event) {
+  
   if (event.type !== 'message' || event.message.type !== 'text') {
     return Promise.resolve(null);
   }
-  // 將下面重複用到的變數提上來
-  var userid = event.source.userId;
-  var user_name = ''
-  
-  // 取得使用者名稱
+  let userid = event.source.userId;
+  let user_name = ''
+  // 取得學員名稱
   client.getProfile(userid)
   .then((profile) => {
     user_name = profile.displayName;
     // console.log(profile.userId);
     // console.log(profile.pictureUrl);
     // console.log(profile.statusMessage);
-    //console.log('user_name',user_name)
   })
   .catch((err) => {
     // error handling
@@ -61,9 +70,9 @@ function handleEvent(event) {
     let today = new Date();
     let now_time = [];
     let distance = []; //存放每堂課程離今天差幾天用
-    var hava_class = false; //判斷今日是否有課程
-    var sign = false; //判斷是否遷到過
-
+    let hava_class = false; //判斷今日是否有課程
+    let sign = false; //判斷是否遷到過
+    let found = false; //判斷是否資料庫內有這名學生
     reply = "";
     now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
@@ -80,58 +89,64 @@ function handleEvent(event) {
       for(let j = 0; j <distance.length; j++){
         // 如果今日有課(時間差為0
         if (distance[j] == 0){
-          hava_class = true;
-        
-          Student.find((err,student_docs) =>{
-            var found = false; //判斷是否資料庫內有這名學生
-            
-            for(let k = 0; k < student_docs.length; k++){
-              // 如果有這名學生
-              if (user_name === student_docs[k].name){
-                found = true;
-                let re1 = new RegExp('w*' + docs[j].course + 'w*'); //判斷這堂課是否已在被簽到的紀錄內
+            hava_class = true;
 
-                if(re1.test(student_docs[k].course)){
-                  sign = true;
-                  break
-                }
-                
-                let sign_class = student_docs[k].course + '，' + docs[j].course;
-                //寫入簽到次數
-                Student.findOneAndUpdate({'name' : user_name}, {$set:{'times': student_docs[k].times + 1}});
+            Student.find((err,student_docs) =>{
+                // console.log(student_docs)
+              
+                Student.findOne({ lineid: userid },(err, adventure)=> {
+                  console.log(found,"1號")
+                  console.log(userid)
+                  if (adventure != null){
+                    console.log(adventure)
+                    console.log(docs[j].course)
+                    
+                    // if(user_name != adventure.name){
+                    //     Student.findOneAndUpdate({'name' : adventure.name}, {$set:{'name': user_name}});
+                    // }
 
-                //寫入簽到的課程
-                Student.findOneAndUpdate({'name' : user_name}, {$set:{'course': sign_class}});
-              }
-            }
+                    if (adventure.course.indexOf(docs[j].course) != -1){
+                        sign = true;
+                        return client.replyMessage(event.replyToken,{
+                          type: 'text',
+                          text: "已經簽到"
+                        });                                      
+                    }else{
+                            adventure.course.push(docs[j].course);
+                            //console.log(adventure.course)
+                            //寫入簽到次數與課程
+                            Student.findOneAndUpdate({lineid: userid}, {$set:{times: adventure.times + 1, course: adventure.course}}, (err, ct)=>{
+                                console.log(err)
+                            });
 
-            if(hava_class === true && sign === false){
-              if(!found){
-                let studentData = new Student({
-                name: user_name,
-                course: docs[j].course,
-                times : 1
-                });
-                studentData.save((err, Student) => {
-                if (err) {
-                  return handleError(err);
-                }
-                console.log('document saved');
-                });
-              }
-
-              return client.replyMessage(event.replyToken,{
-                  type: 'text',
-                  text: "簽到完成"
-                });
-
-            }else if(hava_class === true){
-              return client.replyMessage(event.replyToken,{
-                  type: 'text',
-                  text: "已經簽到"
-                });     
-            }
-          })
+                            return client.replyMessage(event.replyToken,{
+                              type: 'text',
+                              text: "簽到完成"     
+                            });           
+                        }                 
+                  }else{
+                      console.log(found,"2號");
+                      if(!found){
+                          let studentData = new Student({
+                              lineid: userid, 
+                              name: user_name,
+                              course: docs[j].course,
+                              times : 1
+                          });
+                          studentData.save((err, Student) => {
+                              if (err) {
+                                   return handleError(err);
+                              }
+                              console.log('document saved');
+                          });
+                          return client.replyMessage(event.replyToken,{
+                            type: 'text',
+                            text: "簽到完成"     
+                          });   
+                      }
+                  }
+                })
+            })
         }  
       }
       if(hava_class == false){
@@ -144,19 +159,19 @@ function handleEvent(event) {
 
   }else if(event.message.text === '課程'){
     reply = "";
-    let today = new Date();
+    let today=new Date();
     let now_time = [];
     let distance = [];
     now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
     Class.find((err,docs) => {
       for(let i = 0; i <docs.length; i++){
-        //.log(docs[i].date);
+        console.log(docs[i].date);
         class_time = docs[i].date.split("-");
         let step = (class_time[0] - now_time[0])*365 + (class_time[1] - now_time[1])*30 + (class_time[2] - now_time[2]);
         distance.push(step);
       }
-     // console.log(distance);
+      console.log(distance);
       let k = 999; //看最小值用
       for(let j = 0; j <distance.length; j++){
         if (distance[j] >= 0 && distance[j] < k){
@@ -179,6 +194,8 @@ function handleEvent(event) {
       }
     })
   }else if(event.message.text === '出席率查詢'){
+    // ！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+    
     let times = ''
     Student.find((err, docs) =>{
       for (i in docs){
@@ -195,6 +212,8 @@ function handleEvent(event) {
         text: '尚無資料'
         });
     })
+// ！！！！！！！！！！！！！！！！！
+
   }else if(event.message.text === '幫助' || event.message.text === 'help'){
     reply = "請使用關鍵字：簽到、課程、出席率查詢";
   }else{
@@ -210,19 +229,19 @@ function handleEvent(event) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(bodyParser.json());
-
 //設置ejs為模板引擎
 app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
+
 
 //路由
 routes(app);
 //資料庫連結
 mongoose.connect(
-  process.env['DB_CONNECTION'], { 
-    useUnifiedTopology: true,useNewUrlParser: true 
-  }, () => {
-    console.log("connect DB!");
+    process.env['DB_CONNECTION'], { 
+        useUnifiedTopology: true,useNewUrlParser: true 
+    }, () => {
+        console.log("connect DB!");
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

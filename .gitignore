@@ -2,3 +2,4 @@ node_modules
 package-lock.json
 .env
 app_test.js
+暫時存放.js
