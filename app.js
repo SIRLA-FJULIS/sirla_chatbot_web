@@ -55,6 +55,7 @@ function handleEvent(event) {
     }
     let userid = event.source.userId;
     let user_name = '';
+    let today_format = format('yyyy-MM-dd', new Date())
 
     // 取得學員名稱
     client.getProfile(userid).then((profile) => {
@@ -105,15 +106,12 @@ function handleEvent(event) {
                                         text: "已經簽到"
                                     });                                      
                                 }else{
-                                    //貌似又寫入失敗
-                                    Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: true}}, (err, ct)=>{
-                                        console.log(err)
-                                    });
-                                    // 這邊的回覆會正常出來
-                                    return client.replyMessage(event.replyToken,{
-                                        type: 'text',
-                                        text: "請輸入密碼"     
-                                    });           
+                                    Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: true}}, (err, dos)=>{
+                                        return client.replyMessage(event.replyToken,{
+                                            type: 'text',
+                                            text: "請輸入密碼"     
+                                        });                                           
+                                    })
                                 }                 
                             }else{
                                 console.log(found,"2號");
@@ -149,26 +147,32 @@ function handleEvent(event) {
             }
         });
 
-    }else if(event.message.text === '1234'){
-        Student.findOne({ lineid: userid },(err,status) =>{
-            console.log(status);
-            if(status.sign_status === true){
-                status.course.push("test");
-                //console.log(adventure.course)
-                //寫入簽到次數與課程
-                Student.findOneAndUpdate({lineid: userid}, {$set:{times: status.times + 1, course: status.course, sign_status: false}}, (err, ct)=>{
-                    console.log(err)
-                });
-                return client.replyMessage(event.replyToken,{
-                    type: 'text',
-                    text: "簽到完成"
-                });
-            }else{
-                return client.replyMessage(event.replyToken, {
-                    type: 'text',
-                    text: "查無此關鍵字，請重新輸入"
-                });
-            }
+    }else if(/\d*/.test(event.message.text) === true ){
+        Student.findOne({ lineid: userid }, (err, status) =>{
+            Class.findOne({date: today_format}, (err, class_docs) =>{
+                if(status.sign_status === true && event.message.text == class_docs.check_in_number){
+                    status.course.push(class_docs.course);
+                    //console.log(adventure.course)
+                    //寫入簽到次數與課程
+                    Student.findOneAndUpdate({lineid: userid}, {$set:{times: status.times + 1, course: status.course, sign_status: false}}, (err, ct)=>{
+                        console.log(err)
+                    });
+                    return client.replyMessage(event.replyToken,{
+                        type: 'text',
+                        text: "簽到完成"
+                    });
+                }else if(status.sign_status === true){
+                    return client.replyMessage(event.replyToken, {
+                        type: 'text',
+                        text: "密碼錯誤"
+                    });
+                }else{
+                    return client.replyMessage(event.replyToken, {
+                        type: 'text',
+                        text: "查無此關鍵字，請重新輸入"
+                    });                
+                }                
+            })
         });
     }else if(event.message.text === '課程'){
         let today=new Date();
