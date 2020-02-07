@@ -155,6 +155,9 @@ function handleEvent(event) {
                         text: "簽到完成"
                     });
                 }else if(status.sign_status === true){
+                    Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: false}}, (err, ct)=>{
+                        console.log(err)
+                    });
                     return client.replyMessage(event.replyToken, {
                         type: 'text',
                         text: "密碼錯誤"
