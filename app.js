@@ -17,9 +17,9 @@ const session = require('express-session');
 
 const line = require('@line/bot-sdk');
 const config = {
-  channelId: process.env['channelId'],
-  channelSecret: process.env['CHANNEL_SECRET'],
-  channelAccessToken: process.env['CHANNEL_ACCESS_TOKEN']
+    channelId: process.env['channelId'],
+    channelSecret: process.env['CHANNEL_SECRET'],
+    channelAccessToken: process.env['CHANNEL_ACCESS_TOKEN']
 };
 
 const app = express();
@@ -27,17 +27,11 @@ const port = 3000;
 
 
 app.post('/linewebhook', line.middleware(config), (req, res) => {
- 
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => {
-      res.json(result);
-
-    })
-    .catch((error) => {
-      // error 
-      return false;
-   });
+    Promise.all(req.body.events.map(handleEvent)).then((result) => {
+        res.json(result);
+    }).catch((error) => {
+        return false;
+    });
 });
 
 const client = new line.Client(config);
@@ -49,13 +43,12 @@ const Class = model_class.Course
 
 
 function handleEvent(event) {
-  
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
     }
     let userid = event.source.userId;
     let user_name = '';
-    let today_format = format('yyyy-MM-dd', new Date())
+    let today_format = format('yyyy-MM-dd', new Date());
 
     // 取得學員名稱
     client.getProfile(userid).then((profile) => {
@@ -92,7 +85,7 @@ function handleEvent(event) {
                     hava_class = true;
 
                     Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: false}}, (err, ct)=>{
-                        console.log(err)
+                        console.log(err);
                     });
                     
                     Student.find((err,student_docs) =>{
@@ -147,7 +140,7 @@ function handleEvent(event) {
             }
         });
 
-    }else if(/\d*/.test(event.message.text) === true ){
+    }else if(/\d+/.test(event.message.text) === true ){
         Student.findOne({ lineid: userid }, (err, status) =>{
             Class.findOne({date: today_format}, (err, class_docs) =>{
                 if(status.sign_status === true && event.message.text == class_docs.check_in_number){
