@@ -1,41 +1,59 @@
-<!DOCTYPE html>
 
-<head>
-    <%- include('layout/head'); %>
-    <title><%= title %></title>
-</head>
-<body class="container">
-    
-    <%- include('layout/header'); %>
-    
+<%- include('layout/head'); %>
     <main>
         <h1 class="text-center">課程管理</h1>
-        <div class="row text-right">
-                <a href="/courses/add" type="button" class="btn btn-primary">新增課程</a>
+        <div class="row d-flex justify-content-end m-3">
+                <a href="/courses/add" type="button" class="btn btn-dark">新增課程</a>
         </div>
-        <table class="table">
-            <thead class="thead-dark">
-                <tr>
+        <table class="table m-1">
+            <thead >
+                <tr class="thead-dark">
                     <!-- <th scope="row">_id</th> -->
                     <th scope="row">課程名稱</th>
                     <th scope="row">課程時間</th>
                     <th scope="row">講者</th>
+                    <th scope="row">更動</th>
                 </tr>
                 <% courses.forEach(function( course ){ %>
                 <tr>
-                    <!-- <th><%= course._id %> </th> -->
+                    
                     <th><%= course.course %> </th>
                     <th><%= course.date %> </th>
-                    <th><%= course.lecturer %> </th>
-                    <th><a href="courses/del?id=<%= course.id %>">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>
-                </tr>
-                <% }); %>
-                
+                    <th><%= course.lecturer %></th>
+                    <th><a onclick="delWarning(this)" data-href="courses/del?id=<%= course.id %>" data-id="<%= course.id %>" data-course="<%= course.course %>" data-toggle="modal" data-target="#exampleModal">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>
+                    
+                </tr>     
+                <% }); %> 
             </thead>
         </table>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+        
+                            确定删除<span id="del_warning">?</span>堂課嗎？
+                            <input type="hidden" id="del_id" value="" >
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                            <a type="button" id="del_btn" href="" class="btn btn-primary">刪除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </main>
-    
+    <!-- Modal -->
+    <script>
+        function delWarning(obj){
+            document.getElementById("del_id").value = obj.getAttribute("data-id")
+            document.getElementById("del_warning").innerHTML = obj.getAttribute("data-course")
+            document.getElementById("del_btn").href = obj.getAttribute("data-href")
+        }
+    </script>
     <%- include('layout/footer'); %>
-
-</body>
-</html>
