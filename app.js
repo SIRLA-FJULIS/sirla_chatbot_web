@@ -40,8 +40,6 @@ const model_class = require('./models/data')
 const Student = model.Student;
 const Class = model_class.Course
 
-
-
 function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
@@ -59,8 +57,24 @@ function handleEvent(event) {
     }).catch((err) => {
         // error handling
     });
+    // 設定管理員推播訊息給全部人
+    if(userid === 'U3ceeee6cbac7479603b5a7094068f420' && event.message.text.slice(0,2) == "推送"){
+        let msg = {
+            type: 'text',
+            text: event.message.text.slice(2)
+        }
+        // 被推播者
+        Student.find((err, student_docs) =>{
+            for (let k = 0; k < student_docs.length; k++){
+                client.pushMessage(student_docs[k].lineid, msg).then(() =>{
+                    //...
+                }).catch((err)=>{
+                    console.log(err);
+                });               
+            }
+        })
 
-    if (event.message.text === '簽到') {
+    }else if (event.message.text === '簽到') {
         let today = new Date();
         let now_time = [];
         let distance = []; //存放每堂課程離今天差幾天用
@@ -170,7 +184,7 @@ function handleEvent(event) {
                 }                
             })
         });
-    }else if(event.message.text === '課程'){
+    }else if(event.message.text === '最新課程'){
         let today=new Date();
         let now_time = [];
         let distance = [];
