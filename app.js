@@ -255,6 +255,19 @@ app.use(bodyParser.json());
 app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 
+//session
+app.use(session({
+    secret: process.env['SESSION_SECRET'], 
+    resave: true,
+    saveUninitialized: false, // 是否儲存未初始化的會話
+    cookie: { maxAge: 60 * 1000 }
+  }));
+  app.use(flash());
+  app.use((req, res, next) =>{
+    res.locals.errors = req.flash('error')
+    res.locals.success = req.flash('success')
+    next()
+  });
 
 //路由
 routes(app);
