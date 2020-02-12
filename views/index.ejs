@@ -1,24 +1,16 @@
 <!-- views/index.ejs -->
 
-<!DOCTYPE html>
-
     <%- include('layout/head'); %>
-
-<body class="container">
-    
-    <%- include('layout/header'); %>
-    
     <main>
         <div class="jumbotron text-center">
             
             <p>今日課程為：<span><%= courses %></span></p>
             <p>簽到數字：<span id="number"></span></p>
-            <a type="botton" name="number" class="btn btn-primary" onclick="clickBtn()">產生簽到密碼</a> 
+            <a type="botton" name="number" class="btn btn-dark text-white" onclick="clickBtn()">產生簽到密碼</a> 
             <input type="hidden" name="id" value="<%= id %>">
+            
         </div>
     </main>  
-
-    <%- include('layout/footer'); %>
 
     <script>
         function clickBtn(){
@@ -31,5 +23,4 @@
             }
             
     </script>
-</body>
-</html>
+<%- include('layout/footer'); %>

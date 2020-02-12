@@ -15,13 +15,11 @@
                     <th scope="row">更動</th>
                 </tr>
                 <% courses.forEach(function( course ){ %>
-                <tr>
-                    
+                <tr>   
                     <th><%= course.course %> </th>
                     <th><%= course.date %> </th>
                     <th><%= course.lecturer %></th>
-                    <th><a onclick="delWarning(this)" data-href="courses/del?id=<%= course.id %>" data-id="<%= course.id %>" data-course="<%= course.course %>" data-toggle="modal" data-target="#exampleModal">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>
-                    
+                    <th><a onclick="delWarning(this)" href="" data-href="courses/del?id=<%= course.id %>" data-id="<%= course.id %>" data-course="<%= course.course %>" data-toggle="modal" data-target="#exampleModal">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>     
                 </tr>     
                 <% }); %> 
             </thead>

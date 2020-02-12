@@ -1,35 +1,28 @@
-<!DOCTYPE html>
 <%- include('layout/head'); %>
+<main>
+    <h1 class="page-header text-center m-5">學員簽到記錄</h1>
+    <table class="table">
+        <thead>
+            <tr class="thead-dark"> 
+                <th scope="row">姓名</th>
+                <th scope="row">簽到次數</th>
+                <th scope="row">詳情</th>
+                <th scope="row">更動</th>
 
-<body class="container">
-    
-    <%- include('layout/header'); %>
-    
-    <main>
-        <h1 class="page-header text-center">學員簽到記錄</h1>
-        <table class="table ">
-            <thead class="thead-dark">
-                <tr > 
-                    <th scope="row">姓名</th>
-                    <th scope="row">簽到次數</th>
-                    <th scope="row">詳情</th>
-
+            </tr>
+            <% student_info.forEach(function( student ){ %>
+                <tr>
+                    <th><%= student.name %></th>
+                    <th><%= student.times %></th>
+                    <th><%= student.course %> </th>
+                    <th><a href="student/del?id=<%= student.id %>">删除</a> </th>
                 </tr>
-                <% student_info.forEach(function( student ){ %>
-                    <tr>
-                        <th><%= student.name %></th>
-                        <th><%= student.times %></th>
-                        <th><%= student.course %> </th>
-                        <th><a href="student/del?id=<%= student.id %>">删除</a> </th>
-                    </tr>
-                <% }); %>
-            </thead>
-        </table>
-    </main>
-    
-    <%- include('layout/footer'); %>
-   
-</body>
-</html>
+            <% }); %>
+        </thead>
+    </table>
+</main>
+
+<%- include('layout/footer'); %>
+
 
                
