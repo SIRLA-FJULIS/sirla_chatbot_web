@@ -27,11 +27,19 @@ const port = process.env.PORT || 3000;
 
 
 app.post('/linewebhook', line.middleware(config), (req, res) => {
-    Promise.all(req.body.events.map(handleEvent)).then((result) => {
-        res.json(result);
-    }).catch((error) => {
-        return false;
-    });
+	if(req.body.events[0].type == 'follow'){
+	    Promise.all(req.body.events.map(followEvent)).then((result) => {
+	        res.json(result);
+	    }).catch((error) => {
+	        return false;
+	    });
+	}else{
+	    Promise.all(req.body.events.map(handleEvent)).then((result) => {
+	        res.json(result);
+	    }).catch((error) => {
+	        return false;
+	    });
+	}
 });
 
 const client = new line.Client(config);
@@ -39,6 +47,31 @@ const model = require('./models/student');
 const model_class = require('./models/data')
 const Student = model.Student;
 const Class = model_class.Course
+
+function followEvent(event) {
+    let userid = event.source.userId;
+    let user_name = '';
+
+    client.getProfile(userid).then((profile) => {
+        user_name = profile.displayName;
+        let studentData = new Student({
+		    lineid: userid, 
+		    name: user_name,
+		    times : 0,
+		    sign_status: true
+		});
+
+	    studentData.save((err, Student) => {
+	        if (err) {
+	            return handleError(err);
+	        }
+	        console.log('document saved');
+	    });
+
+    }).catch((err) => {
+        // error handling
+    });
+}
 
 function handleEvent(event) {
     if (event.type !== 'message' || event.message.type !== 'text') {
@@ -73,7 +106,6 @@ function handleEvent(event) {
                 });               
             }
         })
-
     }else if (event.message.text === '簽到') {
         let today = new Date();
         let now_time = [];
@@ -120,26 +152,6 @@ function handleEvent(event) {
                                         });                                           
                                     })
                                 }                 
-                            }else{
-                                console.log(found,"2號");
-                                if(!found){
-                                    let studentData = new Student({
-                                        lineid: userid, 
-                                        name: user_name,
-                                        times : 0,
-                                        sign_status: true
-                                    });
-                                    studentData.save((err, Student) => {
-                                        if (err) {
-                                            return handleError(err);
-                                        }
-                                        console.log('document saved');
-                                        return client.replyMessage(event.replyToken,{
-                                            type: 'text',
-                                            text: "請輸入密碼"     
-                                        });  
-                                    });
-                                }
                             }
                         });
                     })
@@ -280,3 +292,5 @@ mongoose.connect(
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
+// https://sirla-chatbot.herokuapp.com
