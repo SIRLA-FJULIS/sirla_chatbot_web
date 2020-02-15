@@ -33,7 +33,13 @@ app.post('/linewebhook', line.middleware(config), (req, res) => {
 	    }).catch((error) => {
 	        return false;
 	    });
-	}else{
+	}else if(req.body.events[0].type == 'unfollow'){
+        Promise.all(req.body.events.map(unfollowEvent)).then((result) => {
+            res.json(result);
+        }).catch((error) => {
+            return false;
+        });
+    }else{
 	    Promise.all(req.body.events.map(handleEvent)).then((result) => {
 	        res.json(result);
 	    }).catch((error) => {
@@ -52,25 +58,39 @@ function followEvent(event) {
     let userid = event.source.userId;
     let user_name = '';
 
-    client.getProfile(userid).then((profile) => {
-        user_name = profile.displayName;
-        let studentData = new Student({
-		    lineid: userid, 
-		    name: user_name,
-		    times : 0,
-		    sign_status: true
-		});
+    Student.findOne({ lineid: userid },(err, adventure)=> {
+        if(adventure === null){
+            client.getProfile(userid).then((profile) => {
+                user_name = profile.displayName;
+                let studentData = new Student({
+                    lineid: userid, 
+                    name: user_name,
+                    times : 0,
+                    sign_status: true
+                });
 
-	    studentData.save((err, Student) => {
-	        if (err) {
-	            return handleError(err);
-	        }
-	        console.log('document saved');
-	    });
+                studentData.save((err, Student) => {
+                    if (err) {
+                        return followEventr(err);
+                    }
+                    console.log('document saved');
+                });
 
-    }).catch((err) => {
-        // error handling
+            }).catch((err) => {
+                // error handling
+            });
+        }
     });
+}
+
+function unfollowEvent(event){
+    let userid = event.source.userId;
+    Student.remove({lineid: userid}, function(err, docs){
+        if(err){
+            console.log(err);
+        }
+        console.log('刪除成功：');
+    })    
 }
 
 function handleEvent(event) {
@@ -111,7 +131,6 @@ function handleEvent(event) {
         let now_time = [];
         let distance = []; //存放每堂課程離今天差幾天用
         let hava_class = false; //判斷今日是否有課程
-        let found = false; //判斷是否資料庫內有這名學生
         reply = "";
         now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
@@ -130,31 +149,29 @@ function handleEvent(event) {
                 if (distance[j] == 0){
                     hava_class = true;
 
+                    // 默認已經遷到完畢
                     Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: false}}, (err, ct)=>{
                         console.log(err);
                     });
-                    
-                    Student.find((err,student_docs) =>{
-                        // console.log(student_docs)
-                        // 確認是否經有這名學生的資料
-                        Student.findOne({ lineid: userid },(err, adventure)=> {
-                            if (adventure != null){
-                                if (adventure.course.indexOf(docs[j].course) != -1){
+
+                    Student.findOne({ lineid: userid },(err, adventure)=> {
+                        if (adventure != null){
+                            if (adventure.course.indexOf(docs[j].course) != -1){
+                                return client.replyMessage(event.replyToken,{
+                                    type: 'text',
+                                    text: "已經簽到"
+                                });                                      
+                            }else{
+                                // 開啟簽到
+                                Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: true}}, (err, dos)=>{
                                     return client.replyMessage(event.replyToken,{
                                         type: 'text',
-                                        text: "已經簽到"
-                                    });                                      
-                                }else{
-                                    Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: true}}, (err, dos)=>{
-                                        return client.replyMessage(event.replyToken,{
-                                            type: 'text',
-                                            text: "請輸入密碼"     
-                                        });                                           
-                                    })
-                                }                 
-                            }
-                        });
-                    })
+                                        text: "請輸入密碼"     
+                                    });                                           
+                                })
+                            }                 
+                        }
+                    });        
                 }  
             }
 
@@ -250,7 +267,7 @@ function handleEvent(event) {
     }else if(event.message.text === '幫助' || event.message.text === 'help'){
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、課程、出席率查詢"
+            text: "請使用關鍵字：簽到、最新課程、出席率查詢"
         });
     }else{
         return client.replyMessage(event.replyToken, {
