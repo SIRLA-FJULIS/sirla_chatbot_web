@@ -286,7 +286,7 @@ app.use(session({
     secret: process.env['SESSION_SECRET'], 
     resave: true,
     saveUninitialized: false, // 是否儲存未初始化的會話
-    cookie: { maxAge: 60 * 1000 }
+    cookie: { maxAge: 60 * 30000 }
   }));
   app.use(flash());
   app.use((req, res, next) =>{
