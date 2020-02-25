@@ -54,35 +54,32 @@ const model_class = require('./models/data')
 const Student = model.Student;
 const Class = model_class.Course
 
+// 加入好友事件
 function followEvent(event) {
     let userid = event.source.userId;
     let user_name = '';
 
-    Student.findOne({ lineid: userid },(err, adventure)=> {
-        if(adventure === null){
-            client.getProfile(userid).then((profile) => {
-                user_name = profile.displayName;
-                let studentData = new Student({
-                    lineid: userid, 
-                    name: user_name,
-                    times : 0,
-                    sign_status: true
-                });
+    client.getProfile(userid).then((profile) => {
+        user_name = profile.displayName;
+        let studentData = new Student({
+            lineid: userid, 
+            name: user_name,
+            times : 0,
+            sign_status: true
+        });
 
-                studentData.save((err, Student) => {
-                    if (err) {
-                        return followEventr(err);
-                    }
-                    console.log('document saved');
-                });
-
-            }).catch((err) => {
-                // error handling
-            });
-        }
+        studentData.save((err, Student) => {
+            if (err) {
+                return followEventr(err);
+            }
+            console.log('document saved');
+        });
+    }).catch((err) => {
+        // error handling
     });
 }
 
+//移除好友事件
 function unfollowEvent(event){
     let userid = event.source.userId;
     Student.remove({lineid: userid}, function(err, docs){
@@ -130,7 +127,7 @@ function handleEvent(event) {
         let today = new Date();
         let now_time = [];
         let distance = []; //存放每堂課程離今天差幾天用
-        let hava_class = false; //判斷今日是否有課程
+        let have_class = false; //判斷今日是否有課程
         reply = "";
         now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
@@ -147,9 +144,9 @@ function handleEvent(event) {
             for(let j = 0; j <distance.length; j++){
                 // 如果今日有課(時間差為0
                 if (distance[j] == 0){
-                    hava_class = true;
+                    have_class = true;
 
-                    // 默認已經遷到完畢
+                    // 默認已經簽到完畢
                     Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: false}}, (err, ct)=>{
                         console.log(err);
                     });
@@ -175,7 +172,7 @@ function handleEvent(event) {
                 }  
             }
 
-            if(hava_class == false){
+            if(have_class == false){
                 return client.replyMessage(event.replyToken,{
                     type: 'text',
                     text: "今日無課程"
@@ -227,7 +224,7 @@ function handleEvent(event) {
                 distance.push(step);
             }
             console.log(distance);
-            let k = 999; //看最小值用
+            let k = Infinity; //看最小值用
             for(let j = 0; j <distance.length; j++){
                 if (distance[j] >= 0 && distance[j] < k){
                     k = distance[j];
@@ -248,7 +245,7 @@ function handleEvent(event) {
                 });
             }
         })
-    }else if(event.message.text === '出席率查詢'){
+    }else if(event.message.text === '出席查詢'){
 
         Student.findOne({ lineid: userid }, (err, time_docs) =>{
             if (time_docs != null){
