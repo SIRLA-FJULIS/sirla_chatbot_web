@@ -1,4 +1,6 @@
 <%- include('layout/head'); %>
+<title>學員簽到記錄</title>
+<%- include('layout/header'); %>
 <main>
     <h1 class="page-header text-center m-5">學員簽到記錄</h1>
     <table class="table">
@@ -15,13 +17,40 @@
                     <th><%= student.name %></th>
                     <th><%= student.times %></th>
                     <th><%= student.course %> </th>
-                    <th><a href="student/del?id=<%= student.id %>">删除</a> </th>
+                    <th><a onclick="delWarning(this)" href="" data-href="student/del?id=<%= student.id %>" data-id="<%= student.id %>" data-student="<%= student.name %>"  data-toggle="modal" data-target="#exampleModal">删除</a> </th>
                 </tr>
             <% }); %>
         </thead>
     </table>
-</main>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
 
+                    确定删除<span id="del_warning">?</span>的資料嗎？
+                    <input type="hidden" id="del_id" value="" >
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <a type="button" id="del_btn" href="" class="btn btn-primary">刪除</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    function delWarning(obj){
+        document.getElementById("del_id").value = obj.getAttribute("data-id")
+        document.getElementById("del_warning").innerHTML = obj.getAttribute("data-student")
+        document.getElementById("del_btn").href = obj.getAttribute("data-href")
+    }
+</script>
 <%- include('layout/footer'); %>
 
 

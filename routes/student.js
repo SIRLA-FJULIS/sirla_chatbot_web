@@ -18,11 +18,15 @@ router.get('/', (req, res) => {
     }
 });
 router.get('/del', (req, res, next) => {
-    let id = req.query.id;
-    if (id && id != '') {
-        Student_info.findByIdAndRemove(id, (err, docs) => {
-            res.redirect('/student');
-        });
+    if(req.session.userName){
+        let id = req.query.id;
+        if (id && id != '') {
+            Student_info.findByIdAndRemove(id, (err, docs) => {
+                res.redirect('/student');
+            });
+        }
+    }else{
+        res.redirect('/');
     }
 });
 

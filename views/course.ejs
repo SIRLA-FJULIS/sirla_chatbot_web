@@ -1,5 +1,7 @@
 
 <%- include('layout/head'); %>
+<title>課程管理</title>
+<%- include('layout/header'); %>
     <main>
         <h1 class="text-center">課程管理</h1>
         <div class="row d-flex justify-content-end m-3">
@@ -25,26 +27,26 @@
             </thead>
         </table>
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">提示</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-        
-                            确定删除<span id="del_warning">?</span>堂課嗎？
-                            <input type="hidden" id="del_id" value="" >
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                            <a type="button" id="del_btn" href="" class="btn btn-primary">刪除</a>
-                        </div>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+    
+                        确定删除<span id="del_warning">?</span>堂課嗎？
+                        <input type="hidden" id="del_id" value="" >
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <a type="button" id="del_btn" href="" class="btn btn-primary">刪除</a>
                     </div>
                 </div>
             </div>
+        </div>
     </main>
     <!-- Modal -->
     <script>

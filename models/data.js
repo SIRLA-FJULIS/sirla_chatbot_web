@@ -11,7 +11,8 @@ let courseSchema = new mongoose.Schema({
         required:true
     },
     date:{
-        type:String
+        type:String,
+        required:true
         
     },  
     check_in_number:{
