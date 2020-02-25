@@ -245,6 +245,18 @@ function handleEvent(event) {
                 });
             }
         })
+   	}else if(event.message.text === '課程列表'){
+   		Class.find((err,all_class) => {
+   			let total = [];
+   			for(let i = 0; i < all_class.length; i++){
+   				total.push([" 課程名稱：", all_class[i].course + '\n', "日期：", all_class[i].date + '\n', "講者：", all_class[i].lecturer].join(" "))
+   			}
+
+			return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: total.join("\n\n")
+            });
+    	});
     }else if(event.message.text === '出席查詢'){
 
         Student.findOne({ lineid: userid }, (err, time_docs) =>{
