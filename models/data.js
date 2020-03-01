@@ -17,6 +17,9 @@ let courseSchema = new mongoose.Schema({
     },  
     check_in_number:{
         type:Number,   
-    }  
+    },
+    teaching_material:{
+        type:String,
+    }
 });
 exports.Course = mongoose.model('data' , courseSchema, 'data')

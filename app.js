@@ -249,13 +249,13 @@ function handleEvent(event) {
    		Class.find((err,all_class) => {
    			let total = [];
    			for(let i = 0; i < all_class.length; i++){
-   				total.push([" 課程名稱：", all_class[i].course + '\n', "日期：", all_class[i].date + '\n', "講者：", all_class[i].lecturer].join(" "))
+   				total.push([" 課程名稱：", all_class[i].course + '\n', "日期：", all_class[i].date + '\n', "講者：", all_class[i].lecturer + '\n', "教材連結：", all_class[i].teaching_material].join(" "))
    			}
 
 			return client.replyMessage(event.replyToken, {
-                type: 'text',
-                text: total.join("\n\n")
-            });
+				type: 'text',
+				text: total.join("\n\n")
+			});
     	});
     }else if(event.message.text === '出席查詢'){
 
