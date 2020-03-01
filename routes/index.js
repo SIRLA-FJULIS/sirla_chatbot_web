@@ -31,7 +31,6 @@ module.exports = function (app) {
 
                 req.flash('error','帳號密碼錯誤')
                 res.redirect('login')
-                res.send('帳號或密碼錯誤')
             }
         })
     });

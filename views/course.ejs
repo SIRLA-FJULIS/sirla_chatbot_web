@@ -14,13 +14,21 @@
                     <th scope="row">課程名稱</th>
                     <th scope="row">課程時間</th>
                     <th scope="row">講者</th>
+                    <th scope="row">教材</th>
                     <th scope="row">更動</th>
+                    
                 </tr>
                 <% courses.forEach(function( course ){ %>
                 <tr>   
                     <th><%= course.course %> </th>
                     <th><%= course.date %> </th>
                     <th><%= course.lecturer %></th>
+                    <% if(course.teaching_material){%>
+                        <th><a href="<%= course.teaching_material %>">Slide</a></th>
+                    <% }%>
+                    <% if(!course.teaching_material){%>
+                        <th><a>未開啟</a></th>
+                    <%}%>
                     <th><a onclick="delWarning(this)" href="" data-href="courses/del?id=<%= course.id %>" data-id="<%= course.id %>" data-course="<%= course.course %>" data-toggle="modal" data-target="#exampleModal">删除</a> | <a href="courses/update?id=<%= course.id %>">修改</a></th>     
                 </tr>     
                 <% }); %> 
@@ -55,5 +63,6 @@
             document.getElementById("del_warning").innerHTML = obj.getAttribute("data-course")
             document.getElementById("del_btn").href = obj.getAttribute("data-href")
         }
+        
     </script>
     <%- include('layout/footer'); %>

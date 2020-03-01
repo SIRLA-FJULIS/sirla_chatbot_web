@@ -5,7 +5,7 @@ const Course = model.Course;
 const router = express.Router();
 
 
-// 首頁
+// 課程首頁
 
 router.get('/', (req, res, next) => {
     if(req.session.userName){
@@ -16,7 +16,7 @@ router.get('/', (req, res, next) => {
             });
             res.render('course', {
                 title: '課程管理',
-                courses: sortcourse
+                courses: sortcourse,
             });
             
         });
@@ -46,7 +46,8 @@ router.post('/add', (req, res, next) =>  {
         let courses = new Course({
             course: req.body.course,
             date: req.body.date,
-            lecturer: req.body.lecturer
+            lecturer: req.body.lecturer,
+            teaching_material:req.body.material
         });
         courses.save((err, doc) => {
             res.redirect('/courses');
@@ -97,7 +98,8 @@ router.post('/update', (req, res, next) =>  {
         let courses = {
             course: req.body.course,
             date: req.body.date,
-            lecturer: req.body.lecturer
+            lecturer: req.body.lecturer,
+            teaching_material:req.body.teaching_material
         };
 
         let id = req.body.id;
