@@ -241,7 +241,7 @@ function handleEvent(event) {
             }else{
                 return client.replyMessage(event.replyToken, {
                     type: 'text',
-                    text: [" 課程名稱：", docs[c].course + '\n', "日期：", docs[c].date + '\n', "講者：", docs[c].lecturer].join(" ")
+                    text:[" 課程名稱：", docs[c].course + '\n', "日期：", docs[c].date + '\n', "講者：", docs[c].lecturer + '\n', "教材連結：", docs[c].teaching_material].join(" ")
                 });
             }
         })
@@ -276,7 +276,7 @@ function handleEvent(event) {
     }else if(event.message.text === '幫助' || event.message.text === 'help'){
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、最新課程、出席率查詢"
+            text: "請使用關鍵字：簽到、最新課程、、課程列表、出席查詢"
         });
     }else{
         return client.replyMessage(event.replyToken, {
