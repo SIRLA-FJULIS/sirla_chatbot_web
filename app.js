@@ -276,7 +276,7 @@ function handleEvent(event) {
     }else if(event.message.text === '幫助' || event.message.text === 'help'){
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、最新課程、、課程列表、出席查詢"
+            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢"
         });
     }else{
         return client.replyMessage(event.replyToken, {
