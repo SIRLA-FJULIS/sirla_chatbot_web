@@ -231,8 +231,19 @@ function handleEvent(event) {
                 }
             }
             let c = distance.indexOf(k);
+            
+            if(c == -1){
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: "目前沒有課程"
+                });
 
-癌
+            }else{
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text:[" 課程名稱：", docs[c].course + '\n', "日期：", docs[c].date + '\n', "講者：", docs[c].lecturer + '\n', "教材連結：", docs[c].teaching_material].join(" ")
+                });
+            }
         })
    	}else if(event.message.text === '課程列表'){
    		Class.find((err,all_class) => {
