@@ -205,7 +205,7 @@ function handleEvent(event) {
                 }else{
                     return client.replyMessage(event.replyToken, {
                         type: 'text',
-                        text: "查無此關鍵字，請重新輸入"
+                        text: "查無此關鍵字，請輸入 幫助 查看可用的關鍵字或點選下方選單"
                     });                
                 }                
             })
@@ -232,18 +232,7 @@ function handleEvent(event) {
             }
             let c = distance.indexOf(k);
 
-            if(c == -1){
-                return client.replyMessage(event.replyToken, {
-                    type: 'text',
-                    text: "目前沒有課程"
-                });
-          
-            }else{
-                return client.replyMessage(event.replyToken, {
-                    type: 'text',
-                    text:[" 課程名稱：", docs[c].course + '\n', "日期：", docs[c].date + '\n', "講者：", docs[c].lecturer + '\n', "教材連結：", docs[c].teaching_material].join(" ")
-                });
-            }
+癌
         })
    	}else if(event.message.text === '課程列表'){
    		Class.find((err,all_class) => {
