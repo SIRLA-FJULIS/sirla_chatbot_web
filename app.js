@@ -287,7 +287,7 @@ function handleEvent(event) {
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+// app.use(cors());
 app.use(bodyParser.json());
 //設置ejs為模板引擎
 app.set('views', path.join(__dirname, '/views'));
