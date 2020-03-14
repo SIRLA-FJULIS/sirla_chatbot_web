@@ -5,10 +5,10 @@
 <main>
     <div class="jumbotron text-center">
         
-        <p>今日課程為：<span><%= courses %></span></p>
+        <p>今日課程為：<span><%= course %></span></p>
         <p>簽到數字：<span id="number"><%= number %></span></p>
         <input type="hidden" name="id" value="<%= id %>">
-        <%if(courses == '無課程'){ %>
+        <%if(course == '無課程'){ %>
             <input type="botton" disabled="disabled" name="number" class="btn btn-dark text-white" value="產生簽到密碼">
         <%}else{%>
             <a type="botton" name="number" class="btn btn-dark text-white" onclick="clickBtn()">產生簽到密碼</a> 

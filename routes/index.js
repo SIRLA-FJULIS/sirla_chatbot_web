@@ -60,7 +60,7 @@ module.exports = function (app) {
                     number = docs[i].check_in_number    
                 } 
             }
-            res.render('index', {courses:course, id:id, number:number})
+            res.render('index', {course:course, id:id, number:number})
             })
 
         }else{
@@ -74,7 +74,7 @@ module.exports = function (app) {
             let date = format('yyyy-MM-dd', new Date())
             let number = req.query.number
             Course.findOneAndUpdate({date:date}, {$set:{check_in_number:number}}, {upsert:true}, (err, docs) => {
-                res.render('index')
+                res.redirect('/')
             });
         }
     })
