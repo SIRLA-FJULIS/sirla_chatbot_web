@@ -5,10 +5,11 @@
 <main>
     <div class="jumbotron text-center">
         
-        <p>今日課程為：<span><%= courses %></span></p>
+        <p>今日課程為：<span><%= course %></span></p>
         <p>簽到數字：<span id="number"><%= number %></span></p>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="id" value="<%= id %>">
-        <%if(courses == '無課程'){ %>
+        <%if(course == '無課程'){ %>
             <input type="botton" disabled="disabled" name="number" class="btn btn-dark text-white" value="產生簽到密碼">
         <%}else{%>
             <a type="botton" name="number" class="btn btn-dark text-white" onclick="clickBtn()">產生簽到密碼</a> 
@@ -20,12 +21,17 @@
 <script>
     function clickBtn(){
         let number = Math.floor(Math.random()*10000)
-        document.getElementById('number').innerHTML = number
-
+        let token = document.querySelector('input[name="_csrf"]').value
         let xhttp = new XMLHttpRequest()
-        xhttp.open('GET', '/get_number?number=' + number)
+        xhttp.open('POST', '/get_number?number=' + number)
+        xhttp.setRequestHeader('CSRF-Token', token)
         xhttp.send()
+        xhttp.onload = function (e) {
+            if(e.target.status == 200){
+                document.getElementById('number').innerHTML = number
+            } 
         }
+    }
         
 </script>
 <%- include('layout/footer'); %>

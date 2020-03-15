@@ -5,6 +5,11 @@ const model2 = require('../models/login');
 const Course = model.Course;
 const Login = model2.Login;
 
+// csrf防護
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: false });
+
+
 module.exports = function (app) {
     
     // 登入頁面 
@@ -46,7 +51,7 @@ module.exports = function (app) {
       })
       
     //首頁呈現當日課程
-    app.get('/', (req, res, next) => {
+    app.get('/', csrfProtection , (req, res, next) => {
         if(req.session.userName){
             Course.find((err, docs) => {
             let course = '無課程'
@@ -60,7 +65,7 @@ module.exports = function (app) {
                     number = docs[i].check_in_number    
                 } 
             }
-            res.render('index', {courses:course, id:id, number:number})
+            res.render('index', {course:course, id:id, number:number, csrfToken: req.csrfToken()})
             })
 
         }else{
@@ -69,13 +74,14 @@ module.exports = function (app) {
             }
     })
     // 產生密碼後儲存
-    app.get('/get_number', (req, res, next) => {
-        let date = format('yyyy-MM-dd', new Date())
-        let number = req.query.number
-        Course.findOneAndUpdate({date:date}, {$set:{check_in_number:number}}, {upsert:true}, (err, docs) => {
-            res.render('index')
-        });
-        
+    app.post('/get_number', csrfProtection, (req, res, next) => {
+        if(req.session.userName){
+            let date = format('yyyy-MM-dd', new Date())
+            let number = req.query.number
+            Course.findOneAndUpdate({date:date}, {$set:{check_in_number:number}}, {upsert:true}, (err, docs) => {
+                res.redirect('/')
+            });
+        }
     })
     //路由
     app.use('/login', require('./index'));
