@@ -27,6 +27,7 @@ const port = process.env.PORT || 3000;
 
 
 app.post('/linewebhook', line.middleware(config), (req, res) => {
+	console.log(req.body.events[0].type)
 	if(req.body.events[0].type == 'follow'){
 	    Promise.all(req.body.events.map(followEvent)).then((result) => {
 	        res.json(result);
@@ -39,6 +40,18 @@ app.post('/linewebhook', line.middleware(config), (req, res) => {
         }).catch((error) => {
             return false;
         });
+    }else if(req.body.events[0].type == 'join'){
+	    Promise.all(req.body.events.map(joinEvent)).then((result) => {
+	        res.json(result);
+	    }).catch((error) => {
+	        return false;
+	    });
+    }else if (req.body.events[0].type == 'leave'){
+	    Promise.all(req.body.events.map(leaveEvent)).then((result) => {
+	        res.json(result);
+	    }).catch((error) => {
+	        return false;
+	    });
     }else{
 	    Promise.all(req.body.events.map(handleEvent)).then((result) => {
 	        res.json(result);
@@ -51,8 +64,10 @@ app.post('/linewebhook', line.middleware(config), (req, res) => {
 const client = new line.Client(config);
 const model = require('./models/student');
 const model_class = require('./models/data')
+const model_group = require('./models/group')
 const Student = model.Student;
-const Class = model_class.Course
+const Class = model_class.Course;
+const Group = model_group.Group;
 
 // 加入好友事件
 function followEvent(event) {
@@ -90,9 +105,40 @@ function unfollowEvent(event){
     })    
 }
 
+function joinEvent(event){
+    let groupid = event.source.groupid;
+    let group_name = '';
+    client.getProfile(groupid).then((profile) => {
+        group_name = profile.displayName;
+        let groupData = new Group({
+            groupid: groupid, 
+            name: group_name
+        });
+
+        groupData.save((err, Group) => {
+            if (err) {
+                return joinEvent(err);
+            }
+            console.log('group document saved');
+        });
+    }).catch((err) => {
+        // error handling
+    });
+}
+
+function leaveEvent(event){
+    let groupid = event.source.groupid;
+    Group.remove({groupid: groupid}, function(err, docs){
+        if(err){
+            console.log(err);
+        }
+        console.log('刪除成功：');
+    })    
+}
+
 function handleEvent(event) {
 	console.log(event)
-	if ('groupId' in event.source === false){
+	if (event.source.type === user){
 	    if (event.type !== 'message' || event.message.type !== 'text') {
 	        return Promise.resolve(null);
 	    }
