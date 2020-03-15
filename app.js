@@ -138,7 +138,7 @@ function leaveEvent(event){
 
 function handleEvent(event) {
 	console.log(event)
-	if (event.source.type === user){
+	if (event.source.type === 'user'){
 	    if (event.type !== 'message' || event.message.type !== 'text') {
 	        return Promise.resolve(null);
 	    }
@@ -168,8 +168,14 @@ function handleEvent(event) {
 	                    //...
 	                }).catch((err)=>{
 	                    console.log(err);
-	                });               
+	                });
 	            }
+
+	            client.pushMessage('Cac011ae59261d04264171ab53151a296', msg).then(() =>{
+	                //...
+	            }).catch((err)=>{
+	                console.log(err);
+	            });
 	        })
 	    }else if (event.message.text === '簽到') {
 	        let today = new Date();
