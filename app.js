@@ -27,7 +27,7 @@ const port = process.env.PORT || 3000;
 
 
 app.post('/linewebhook', line.middleware(config), (req, res) => {
-	console.log(req.body.events[0].type)
+	// console.log(req.body.events[0].type)
 	if(req.body.events[0].type == 'follow'){
 	    Promise.all(req.body.events.map(followEvent)).then((result) => {
 	        res.json(result);
@@ -107,23 +107,18 @@ function unfollowEvent(event){
 
 function joinEvent(event){
     let groupid = event.source.groupid;
-    let group_name = '';
-    client.getProfile(groupid).then((profile) => {
-        group_name = profile.displayName;
-        let groupData = new Group({
-            groupid: groupid, 
-            name: group_name
-        });
-
-        groupData.save((err, Group) => {
-            if (err) {
-                return joinEvent(err);
-            }
-            console.log('group document saved');
-        });
-    }).catch((err) => {
-        // error handling
+    let groupData = new Group({
+        groupid: groupid, 
+        name: "1",
     });
+
+    groupData.save((err, Group) => {
+        if (err) {
+            return joinEvent(err);
+        }
+        console.log('document saved');
+    });
+
 }
 
 function leaveEvent(event){
@@ -138,6 +133,7 @@ function leaveEvent(event){
 
 function handleEvent(event) {
 	console.log(event)
+
 	if (event.source.type === 'user'){
 	    if (event.type !== 'message' || event.message.type !== 'text') {
 	        return Promise.resolve(null);
@@ -149,9 +145,10 @@ function handleEvent(event) {
 	    // 取得學員名稱
 	    client.getProfile(userid).then((profile) => {
 	        user_name = profile.displayName;
-	        // console.log(profile.userId);
-	        // console.log(profile.pictureUrl);
-	        // console.log(profile.statusMessage);
+	        console.log(user_name)
+	        //console.log(profile.userId);
+	        //console.log(profile.pictureUrl);
+	        //console.log(profile.statusMessage);
 	    }).catch((err) => {
 	        // error handling
 	    });
@@ -170,18 +167,24 @@ function handleEvent(event) {
 	                    console.log(err);
 	                });
 	            }
-
-	            client.pushMessage('Cac011ae59261d04264171ab53151a296', msg).then(() =>{
-	                //...
-	            }).catch((err)=>{
-	                console.log(err);
-	            });
 	        })
+
+	        Group.find((err, group_docs) =>{
+	        	for (let m = 0; m < group_docs.length; m++){
+		            client.pushMessage(group_docs[k].groupid, msg).then(() =>{
+		                //...
+		            }).catch((err)=>{
+		                console.log(err);
+		            });
+	        	}
+	        });
+
 	    }else if (event.message.text === '簽到') {
 	        let today = new Date();
 	        let now_time = [];
 	        let distance = []; //存放每堂課程離今天差幾天用
 	        let have_class = false; //判斷今日是否有課程
+	        let found = false; //判斷資料庫內是否有這名學生
 	        reply = "";
 	        now_time.push(today.getFullYear(), today.getMonth()+1, today.getDate());
 
@@ -204,8 +207,9 @@ function handleEvent(event) {
 	                    Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: false}}, (err, ct)=>{
 	                        console.log(err);
 	                    });
-
+	                    console.log("1")
 	                    Student.findOne({ lineid: userid },(err, adventure)=> {
+	                    	found = true;
 	                        if (adventure != null){
 	                            if (adventure.course.indexOf(docs[j].course) != -1){
 	                                return client.replyMessage(event.replyToken,{
@@ -222,7 +226,31 @@ function handleEvent(event) {
 	                                })
 	                            }                 
 	                        }
-	                    });        
+	                    });
+
+	                    if(found == false){
+                        	console.log("2")
+						    let user_name = '';
+
+						    client.getProfile(userid).then((profile) => {
+						        user_name = profile.displayName;
+						        let studentData = new Student({
+						            lineid: userid, 
+						            name: user_name,
+						            times : 0,
+						            sign_status: true
+						        });
+
+						        studentData.save((err, Student) => {
+						            if (err) {
+						                return followEventr(err);
+						            }
+						            console.log('document saved');
+						        });
+						    }).catch((err) => {
+						        // error handling
+						    });	                        	
+	                    }    
 	                }  
 	            }
 
