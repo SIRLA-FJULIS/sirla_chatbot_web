@@ -107,8 +107,9 @@ function unfollowEvent(event){
 
 function joinEvent(event){
     let groupid = event.source.groupid;
+
     let groupData = new Group({
-        groupid: groupid, 
+        group: groupid, 
         name: "1",
     });
 
@@ -133,6 +134,11 @@ function leaveEvent(event){
 
 function handleEvent(event) {
 	console.log(event)
+	let groupid = event.source.groupid;
+
+    Group.findOne({ groupid: groupid },(err, a)=> {
+        console.log(a);
+    });
 
 	if (event.source.type === 'user'){
 	    if (event.type !== 'message' || event.message.type !== 'text') {
@@ -225,32 +231,37 @@ function handleEvent(event) {
 	                                    });                                           
 	                                })
 	                            }                 
+	                        }else{
+	                        	console.log("2")
+							    let user_name = '';
+
+							    client.getProfile(userid).then((profile) => {
+							        user_name = profile.displayName;
+							        let studentData = new Student({
+							            lineid: userid, 
+							            name: user_name,
+							            times : 0,
+							            sign_status: true
+							        });
+
+							        studentData.save((err, Student) => {
+							            if (err) {
+							                return followEventr(err);
+							            }
+							            console.log('document saved');
+							        });
+							    }).catch((err) => {
+							        // error handling
+							    });
+							    
+                                Student.findOneAndUpdate({lineid: userid}, {$set:{sign_status: true}}, (err, dos)=>{
+                                    return client.replyMessage(event.replyToken,{
+                                        type: 'text',
+                                        text: "請輸入密碼"     
+                                    });                                           
+                                })							                            	
 	                        }
 	                    });
-
-	                    if(found == false){
-                        	console.log("2")
-						    let user_name = '';
-
-						    client.getProfile(userid).then((profile) => {
-						        user_name = profile.displayName;
-						        let studentData = new Student({
-						            lineid: userid, 
-						            name: user_name,
-						            times : 0,
-						            sign_status: true
-						        });
-
-						        studentData.save((err, Student) => {
-						            if (err) {
-						                return followEventr(err);
-						            }
-						            console.log('document saved');
-						        });
-						    }).catch((err) => {
-						        // error handling
-						    });	                        	
-	                    }    
 	                }  
 	            }
 
