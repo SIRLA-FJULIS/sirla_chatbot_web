@@ -106,11 +106,10 @@ function unfollowEvent(event){
 }
 
 function joinEvent(event){
-    let groupid = event.source.groupid;
+    let groupid = event.source.groupId;
 
     let groupData = new Group({
-        group: groupid, 
-        name: "1",
+        groupid: groupid, 
     });
 
     groupData.save((err, Group) => {
@@ -123,7 +122,7 @@ function joinEvent(event){
 }
 
 function leaveEvent(event){
-    let groupid = event.source.groupid;
+    let groupid = event.source.groupId;
     Group.remove({groupid: groupid}, function(err, docs){
         if(err){
             console.log(err);
@@ -134,11 +133,21 @@ function leaveEvent(event){
 
 function handleEvent(event) {
 	console.log(event)
-	let groupid = event.source.groupid;
+	let groupid = event.source.groupId;
 
-    Group.findOne({ groupid: groupid },(err, a)=> {
+    Group.find((err, a)=> {
+    	if (err) console.log(err);
         console.log(a);
     });
+
+	client.getGroupMemberIds(groupid)
+	  .then((ids) => {
+	  	console.log("333")
+	    ids.forEach((id) => console.log(id));
+	  })
+	  .catch((err) => {
+	    // error handling
+	});    
 
 	if (event.source.type === 'user'){
 	    if (event.type !== 'message' || event.message.type !== 'text') {
