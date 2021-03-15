@@ -139,7 +139,7 @@ function handleEvent(event) {
         // 被推播者
         Student.find((err, student_docs) =>{
             for (let k = 0; k < student_docs.length; k++){
-                if(student_docs[k].push_status = true){
+                if(student_docs[k].push_status !== false){
                     client.pushMessage(student_docs[k].lineid, msg).then(() =>{
                     }).catch((err)=>{
                         console.log(err);
