@@ -30,4 +30,17 @@ router.get('/del', (req, res, next) => {
     }
 });
 
+router.get('/restart', (req, res, next) => {
+    if(req.session.userName){
+        let id = req.query.id;
+        if (id && id != '') {
+            Student_info.findByIdAndUpdate(id, {course: '', time: 0},(err, docs) => {
+                res.redirect('/student');
+            });
+        }
+    }else{
+        res.redirect('/');
+    }
+});
+
 module.exports = router;

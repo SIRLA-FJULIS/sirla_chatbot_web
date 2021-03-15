@@ -68,7 +68,8 @@ function followEvent(event) {
             lineid: userid, 
             name: user_name,
             times : 0,
-            sign_status: true
+            sign_status: true,
+            push_status: true
         });
 
         studentData.save((err, Student) => {
@@ -138,11 +139,12 @@ function handleEvent(event) {
         // 被推播者
         Student.find((err, student_docs) =>{
             for (let k = 0; k < student_docs.length; k++){
-                client.pushMessage(student_docs[k].lineid, msg).then(() =>{
-                    //...
-                }).catch((err)=>{
-                    console.log(err);
-                });
+                if(student_docs[k].push_status = true){
+                    client.pushMessage(student_docs[k].lineid, msg).then(() =>{
+                    }).catch((err)=>{
+                        console.log(err);
+                    });                    
+                }
             }
         })
 
@@ -193,7 +195,6 @@ function handleEvent(event) {
                                 })
                             }                 
                         }else{
-                        	console.log("2")
 						    let user_name = '';
 
 						    client.getProfile(userid).then((profile) => {
@@ -202,7 +203,8 @@ function handleEvent(event) {
 						            lineid: userid, 
 						            name: user_name,
 						            times : 0,
-						            sign_status: true
+						            sign_status: true,
+                                    push_status: true
 						        });
 
 						        studentData.save((err, Student) => {
@@ -332,6 +334,27 @@ function handleEvent(event) {
             type: 'text',
             text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢"
         });
+    }else if(event.message.text === '聯絡我們'){
+        return client.replyMessage(event.replyToken, {
+            type: 'text',
+            text: "請寄信到sirla的信箱：zero.sirla.hero@gmail.com，或是FB搜尋sirla粉專"
+        });
+    }else if(event.message.text === '停止推送'){
+        Student.findOneAndUpdate({lineid: userid}, {$set:{push_status: false}}, (err, dos)=>{
+            return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: "推送訊息已停止，若要恢復，請回傳「恢復推送」"
+            });                                        
+        })  
+
+    }else if(event.message.text === '恢復推送'){
+        Student.findOneAndUpdate({lineid: userid}, {$set:{push_status: true}}, (err, dos)=>{
+            return client.replyMessage(event.replyToken, {
+                type: 'text',
+                text: "推送訊息已開啟，若要停止，請回傳「停止推送」"
+            });                                      
+        }) 
+
     }else{
         return client.replyMessage(event.replyToken, {
             type: 'text',

@@ -7,6 +7,7 @@ let studentSchema = new mongoose.Schema({
     course: Array,
     times: Number,
     sign_status: Boolean,
+    push_status: Boolean,
 });
 
 exports.Student = mongoose.model('student_info', studentSchema, 'student');

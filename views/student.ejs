@@ -9,15 +9,16 @@
                 <th scope="row">姓名</th>
                 <th scope="row">簽到次數</th>
                 <th scope="row">詳情</th>
-                <th scope="row">更動</th>
-
+                <th scope="row">刪除</th>
+                <th scope="row">歸零</th>
             </tr>
             <% student_info.forEach(function( student ){ %>
                 <tr>
                     <th><%= student.name %></th>
                     <th><%= student.times %></th>
                     <th><%= student.course %> </th>
-                    <th><a onclick="delWarning(this)" href="" data-href="student/del?id=<%= student.id %>" data-id="<%= student.id %>" data-student="<%= student.name %>"  data-toggle="modal" data-target="#exampleModal">删除</a> </th>
+                    <th><a onclick="delWarning(this)" href="" data-href="student/del?id=<%= student.id %>" data-id="<%= student.id %>" data-student="<%= student.name %>"  data-toggle="modal" data-target="#exampleModal">删除</a></th>
+                    <th><a onclick="Restart(this)" href="" data-href="student/restart?id=<%= student.id %>" data-id="<%= student.id %>" data-student="<%= student.name %>"  data-toggle="modal" data-target="#restartModal">歸零</a></th>
                 </tr>
             <% }); %>
         </thead>
@@ -43,12 +44,39 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="restartModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    確定歸零<span id="restart">?</span>的資料嗎？
+                    <input type="hidden" id="restart_id" value="" >
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <a type="button" id="restart_btn" href="" class="btn btn-primary">歸零</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 <script>
     function delWarning(obj){
         document.getElementById("del_id").value = obj.getAttribute("data-id")
         document.getElementById("del_warning").innerHTML = obj.getAttribute("data-student")
         document.getElementById("del_btn").href = obj.getAttribute("data-href")
+    }
+
+    function Restart(obj){
+        document.getElementById("restart_id").value = obj.getAttribute("data-id")
+        document.getElementById("restart").innerHTML = obj.getAttribute("data-student")
+        document.getElementById("restart_btn").href = obj.getAttribute("data-href")
     }
 </script>
 <%- include('layout/footer'); %>
