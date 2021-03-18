@@ -56,6 +56,7 @@ const model_group = require('./models/group')
 const Student = model.Student;
 const Class = model_class.Course;
 const Group = model_group.Group;
+const Admin = model.Admin;
 
 // 加入好友事件
 function followEvent(event) {
@@ -332,7 +333,7 @@ function handleEvent(event) {
     }else if(event.message.text === '幫助' || event.message.text === 'help'){
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢"
+            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢、停止推送、恢復推送"
         });
     }else if(event.message.text === '聯絡我們'){
         return client.replyMessage(event.replyToken, {
@@ -354,6 +355,43 @@ function handleEvent(event) {
                 text: "推送訊息已開啟，若要停止，請回傳「停止推送」"
             });                                      
         }) 
+
+    }else if(userid === 'U3ceeee6cbac7479603b5a7094068f420' && event.message.text.slice(0,5) == "新增管理員"){
+        admin_name = event.message.text.slice(5)
+        console.log(admin_name)
+
+        Student.findOne({ name: admin_name }, (err, name_docs) =>{
+            if (name_docs != null){
+                //取得要新增的人的userid
+                client.getProfile(name_docs.userid).then((profile) => {
+                    user_name = profile.displayName;
+                    let adminData = new Admin({
+                        lineid: name_docs.userid, 
+                        name: user_name,
+                    });
+
+                    adminData.save((err, Admin) => {
+                        if (err) {
+                            return followEventr(err);
+                        }
+                        console.log('document saved');
+                    });
+                }).catch((err) => {
+                    // error handling
+                });
+
+                // 回傳確認訊息
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: '管理員' + admin_name + '已新增完成'
+                });
+            }else{
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: '查無此人，請確認名稱是否正確'
+                });
+            }
+         });
 
     }else{
         return client.replyMessage(event.replyToken, {
