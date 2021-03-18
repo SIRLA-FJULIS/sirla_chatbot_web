@@ -333,7 +333,7 @@ function handleEvent(event) {
     }else if(event.message.text === '幫助' || event.message.text === 'help'){
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢、停止推送、恢復推送"
+            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢、停止推送、恢復推送、聯絡我們"
         });
     }else if(event.message.text === '聯絡我們'){
         return client.replyMessage(event.replyToken, {
@@ -376,15 +376,17 @@ function handleEvent(event) {
                         }
                         console.log('document saved');
                     });
+
+                   // 回傳確認訊息
+                    return client.replyMessage(event.replyToken, {
+                        type: 'text',
+                        text: '管理員' + admin_name + '已新增完成'
+                    });
+                    
                 }).catch((err) => {
                     // error handling
                 });
 
-                // 回傳確認訊息
-                return client.replyMessage(event.replyToken, {
-                    type: 'text',
-                    text: '管理員' + admin_name + '已新增完成'
-                });
             }else{
                 return client.replyMessage(event.replyToken, {
                     type: 'text',
@@ -396,7 +398,7 @@ function handleEvent(event) {
     }else{
         return client.replyMessage(event.replyToken, {
             type: 'text',
-            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢"
+            text: "請使用關鍵字：簽到、最新課程、課程列表、出席查詢、停止推送、恢復推送、聯絡我們"
         });
     }
 	
