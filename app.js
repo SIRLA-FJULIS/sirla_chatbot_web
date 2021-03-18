@@ -372,6 +372,10 @@ function handleEvent(event) {
 
                     adminData.save((err, Admin) => {
                         if (err) {
+                            return client.replyMessage(event.replyToken, {
+                                type: 'text',
+                                text: '管理員新增失敗'
+                            });
                             return followEventr(err);
                         }
                         console.log('document saved');
@@ -382,7 +386,7 @@ function handleEvent(event) {
                         type: 'text',
                         text: '管理員' + admin_name + '已新增完成'
                     });
-                    
+
                 }).catch((err) => {
                     // error handling
                 });
