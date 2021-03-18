@@ -87,5 +87,6 @@ module.exports = function (app) {
     app.use('/login', require('./index'));
     app.use('/student', require('./student'));
     app.use('/courses', require('./courses'));
+    app.use('/admin', require('./admin'));
 
   }
