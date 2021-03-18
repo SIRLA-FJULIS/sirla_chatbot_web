@@ -50,13 +50,23 @@ app.post('/linewebhook', line.middleware(config), (req, res) => {
 });
 
 const client = new line.Client(config);
+//引入對應資料表
 const model = require('./models/student');
 const model_class = require('./models/data')
-const model_group = require('./models/group')
+const model_admin = require('./models/admin')
+
 const Student = model.Student;
 const Class = model_class.Course;
-const Group = model_group.Group;
-const Admin = model.Admin;
+const Admin = model_admin.Admin;
+
+var admin_list = [];
+
+Admin.find((err, admin_docs) =>{
+    for (let m = 0; m < admin_docs.length; m++){
+        admin_list.push(admin_docs[m].lineid);
+    }
+})
+
 
 // 加入好友事件
 function followEvent(event) {
@@ -97,34 +107,22 @@ function unfollowEvent(event){
 
 
 function handleEvent(event) {
-	console.log(event)
+	//console.log(event)
+    let userid = event.source.userId;
+    let user_name = '';
+
+    //console.log(admin_list);
 
     if (event.type !== 'message' || event.message.type !== 'text') {
         return Promise.resolve(null);
     }
-    let userid = event.source.userId;
-    let user_name = '';
-    let today_format = format('yyyy-MM-dd', new Date());
 
-    client.getProfile(userid).then((profile) => {
-        user_name = profile.displayName;
-        let groupData = new Group({
-        	group: userid + user_name + event.message.text
-        });
-
-        groupData.save((err, Group) => {
-            if (err) {
-                return followEventr(err);
-            }
-        });
-    }).catch((err) => {
-        // error handling
-    });
+    //let today_format = format('yyyy-MM-dd', new Date());
 
     // 取得學員名稱
     client.getProfile(userid).then((profile) => {
         user_name = profile.displayName;
-        console.log(user_name)
+        //console.log(user_name)
         //console.log(profile.userId);
         //console.log(profile.pictureUrl);
         //console.log(profile.statusMessage);
@@ -132,7 +130,7 @@ function handleEvent(event) {
         // error handling
     });
     // 設定管理員推播訊息給全部人
-    if(userid === 'U3ceeee6cbac7479603b5a7094068f420' && event.message.text.slice(0,2) == "推送"){
+    if(admin_list.indexOf(userid) !== -1 && event.message.text.slice(0,2) == "推送"){
         let msg = {
             type: 'text',
             text: event.message.text.slice(2)
@@ -239,7 +237,7 @@ function handleEvent(event) {
 
     }else if(/\d+/.test(event.message.text) === true ){
         Student.findOne({ lineid: userid }, (err, status) =>{
-            Class.findOne({date: today_format}, (err, class_docs) =>{
+            Class.findOne({date: format('yyyy-MM-dd', new Date())}, (err, class_docs) =>{
                 if(status.sign_status === true && event.message.text == class_docs.check_in_number){
                     status.course.push(class_docs.course);
                     //console.log(adventure.course)
@@ -356,26 +354,25 @@ function handleEvent(event) {
             });                                      
         }) 
 
-    }else if(userid === 'U3ceeee6cbac7479603b5a7094068f420' && event.message.text.slice(0,5) == "新增管理員"){
+    }else if(admin_list.indexOf(userid) !== -1 && event.message.text.slice(0,5) == "新增管理員"){
         admin_name = event.message.text.slice(5)
-        console.log(admin_name)
+        
 
         Student.findOne({ name: admin_name }, (err, name_docs) =>{
             if (name_docs != null){
+                
                 //取得要新增的人的userid
-                client.getProfile(name_docs.userid).then((profile) => {
+                client.getProfile(name_docs.lineid).then((profile) => {
                     user_name = profile.displayName;
+                    console.log(user_name)
+                    
                     let adminData = new Admin({
-                        lineid: name_docs.userid, 
+                        lineid: name_docs.lineid, 
                         name: user_name,
                     });
 
                     adminData.save((err, Admin) => {
                         if (err) {
-                            return client.replyMessage(event.replyToken, {
-                                type: 'text',
-                                text: '管理員新增失敗'
-                            });
                             return followEventr(err);
                         }
                         console.log('document saved');
